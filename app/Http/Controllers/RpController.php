@@ -11,21 +11,23 @@ class RpController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Rp::filter($request->all())->orderBy('id', 'desc');
+        $query = Rp::filter($request->all());
+        // return response()->json($query->get());
         // count all employees
         $all_employees = $query->count();
         // avg employee's age
         $avg_employee_age = $query->avg('yoshi');
-        // count all mens employee
-        $all_mens = $query->where(['jinsi'=> 'Erkak'])->count();
-        // count all womens employee
-        $all_womens = $query->where(['jinsi'=> 'Ayol'])->count();
+        // count all gender employee
+        $all_genders = $query->select('jinsi', \Illuminate\Support\Facades\DB::raw('count(*) as total'))->groupBy('jinsi')->get();
         // count all Nation
-        $all_nation = $query->groupBy('millati')->count();
+        $all_nation = $query->groupBy('millati')->count()->get();
+
         $result = array_merge([
             'all_employees' => $all_employees,
+            'all_gender_counts' => $all_genders,
+            'all_nation_counts' => $all_nation,
         ]);
-        return response()->json($query->get());
+        return response()->json($result);
     }
 
     public function uploadExcel(Request $request)
